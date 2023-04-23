@@ -138,4 +138,36 @@ class AccountServiceTest {
         assertEquals(ErrorCode.MAX_ACCOUNT_PER_USER, exception.getErrorCode());
     }
 
+    @Test
+    void deleteAccount_성공() {
+        // given
+        Optional<AccountUser> userData = Optional.of(AccountUser.builder()
+                .id(12345L).build());
+
+
+
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(userData);
+        given(accountRepository.findFirstByOrderByIdDesc())
+                .willReturn(Optional.of(Account.builder()
+                        .accountNumber("1110").build())
+                );
+        given(accountRepository.save(any()))
+                .willReturn(Account.builder()
+                        .accountUser(userData.get())
+                        .accountNumber("1119").build());
+
+        ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
+
+
+        // when
+        AccountDto accountDto = accountService.createAccount(
+                1L, 100L);
+
+        // then
+        verify(accountRepository, times(1)).save(captor.capture());
+        assertEquals(12345L, accountDto.getUserId());
+        assertEquals("1111", captor.getValue().getAccountNumber());
+    }
+
 }
