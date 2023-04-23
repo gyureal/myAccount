@@ -32,5 +32,9 @@ public class Account {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    public void unregister() {
+        this.accountStatus = AccountStatus.UNREGISTERED;
+        this.unRegisteredAt = LocalDateTime.now();
+    }
 
 }
