@@ -65,4 +65,35 @@ class AccountServiceTest {
         assertEquals("1111", captor.getValue().getAccountNumber());
     }
 
+    @Test
+    void 계좌가_없을때_초기_계좌번호로_생성한다() {
+        String INITIAL_ACCOUNT_NUMBER = "1000000000";
+
+        // given
+        Optional<AccountUser> userData = Optional.of(AccountUser.builder()
+                .id(12345L).build());
+
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(userData);
+        given(accountRepository.findFirstByOrderByIdDesc())
+                .willReturn(Optional.empty()
+                );
+        given(accountRepository.save(any()))
+                .willReturn(Account.builder()
+                        .accountUser(userData.get())
+                        .accountNumber("1119").build());
+
+        ArgumentCaptor<Account> captor = ArgumentCaptor.forClass(Account.class);
+
+
+        // when
+        AccountDto accountDto = accountService.createAccount(
+                1L, 100L);
+
+        // then
+        verify(accountRepository, times(1)).save(captor.capture());
+        assertEquals(12345L, accountDto.getUserId());
+        assertEquals(INITIAL_ACCOUNT_NUMBER, captor.getValue().getAccountNumber());
+    }
+
 }
