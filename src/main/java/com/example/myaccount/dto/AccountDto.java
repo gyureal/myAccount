@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AccountDto {
+public class AccountDto {       // controller - service 간 전송
     private Long userId;
     private String accountNumber;
     private Long balance;
