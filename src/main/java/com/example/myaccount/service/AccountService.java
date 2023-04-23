@@ -58,11 +58,41 @@ public class AccountService {
         }
     }
 
+
+
     @Transactional
     public Account getAccount(Long id) {
         if(id < 0){
             throw new RuntimeException("Minus");
         }
         return accountRepository.findById(id).get();
+    }
+
+    @Transactional
+    public AccountDto deleteAccount(Long userId, String accountNumber) {
+        AccountUser accountUser = accountUserRepository.findById(userId)
+                .orElseThrow(() -> new AccountException(ErrorCode.USER_NOT_FOUND));
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountException(ErrorCode.ACCOUNT_NOT_FOUND));
+
+        validateDeleteAccount(accountUser, account);
+
+        account.unregister();
+
+        return AccountDto.fromEntity(account);
+    }
+
+    private void validateDeleteAccount(AccountUser accountUser, Account account) {
+        if (accountUser.getId() != account.getAccountUser().getId()) {
+            throw new AccountException(ErrorCode.USER_ACCOUNT_NOT_MATCH);
+        }
+
+        if (account.getAccountStatus().equals(UNREGISTERED)) {
+            throw new AccountException(ErrorCode.ACCOUNT_ALREADY_UNREGISTERED);
+        }
+
+        if (account.getBalance() > 0) {
+            throw new AccountException(ErrorCode.BALANCE_IS_NOT_EMPTY);
+        }
     }
 }
