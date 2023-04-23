@@ -2,6 +2,7 @@ package com.example.myaccount.controller;
 
 import com.example.myaccount.domain.Account;
 import com.example.myaccount.dto.AccountDto;
+import com.example.myaccount.dto.AccountInfo;
 import com.example.myaccount.dto.CreateAccount;
 import com.example.myaccount.dto.DeleteAccount;
 import com.example.myaccount.service.AccountService;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,9 +49,14 @@ public class AccountController {
         );
     }
 
-    @GetMapping("/account/{id}")
-    public Account getAccount(
-            @PathVariable Long id){
-        return accountService.getAccount(id);
+    @GetMapping("/account")
+    public List<AccountInfo> getAccountsByUserId(
+            @RequestParam("user_id") Long userId) {
+        return accountService.getAccountsByUserId(userId).stream()
+                .map(accountDto -> AccountInfo.builder()
+                        .accountNumber(accountDto.getAccountNumber())
+                        .balance(accountDto.getBalance())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
