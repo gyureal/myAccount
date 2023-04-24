@@ -27,7 +27,7 @@ public class TransactionDto {
     private String transactionId;
     private LocalDateTime transactionAt;
 
-    public TransactionDto fromEntity(Transaction transaction) {
+    public static TransactionDto fromEntity(Transaction transaction) {
         return TransactionDto.builder()
                 .accountNumber(transaction.getAccount().getAccountNumber())
                 .transactionType(transaction.getTransactionType())

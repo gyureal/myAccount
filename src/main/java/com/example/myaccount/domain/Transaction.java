@@ -39,4 +39,5 @@ public class Transaction {
     private LocalDateTime createdAt;
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
 }

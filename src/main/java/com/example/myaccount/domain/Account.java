@@ -1,5 +1,7 @@
 package com.example.myaccount.domain;
 
+import com.example.myaccount.exception.AccountException;
+import com.example.myaccount.type.ErrorCode;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -35,6 +37,13 @@ public class Account {
     public void unregister() {
         this.accountStatus = AccountStatus.UNREGISTERED;
         this.unRegisteredAt = LocalDateTime.now();
+    }
+
+    public void useBalance(Long amount) {
+        if (amount > balance) {
+            throw new AccountException(ErrorCode.AMOUNT_EXCEED_BALANCE);
+        }
+        balance -= amount;
     }
 
 }
