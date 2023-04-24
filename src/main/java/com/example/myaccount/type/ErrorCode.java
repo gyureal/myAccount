@@ -15,7 +15,5 @@ public enum ErrorCode {
     AMOUNT_EXCEED_BALANCE("거래 금액이 계좌 보다 큽니다."),
     ACCOUNT_ALREADY_UNREGISTERED("계좌가 이미 해지되었습니다.");
 
-
-
     private final String description;
 }
