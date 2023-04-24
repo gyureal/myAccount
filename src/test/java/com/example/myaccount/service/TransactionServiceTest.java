@@ -5,9 +5,11 @@ import com.example.myaccount.domain.AccountStatus;
 import com.example.myaccount.domain.AccountUser;
 import com.example.myaccount.domain.Transaction;
 import com.example.myaccount.dto.TransactionDto;
+import com.example.myaccount.exception.AccountException;
 import com.example.myaccount.repository.AccountRepository;
 import com.example.myaccount.repository.AccountUserRepository;
 import com.example.myaccount.repository.TransactionRepository;
+import com.example.myaccount.type.ErrorCode;
 import com.example.myaccount.type.TransactionResultType;
 import com.example.myaccount.type.TransactionType;
 import org.junit.jupiter.api.Test;
@@ -80,6 +82,100 @@ class TransactionServiceTest {
         assertEquals(TransactionType.USE, transactionDto.getTransactionType());
         assertEquals(TransactionResultType.S
                 , transactionDto.getTransactionResultType());
+    }
+
+    @Test
+    void useBalance_유저_정보가_없을때_예외를_던진다(){
+        // given
+        // given
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+        // when
+        AccountException exception = assertThrows(AccountException.class,
+                () -> transactionService.useBalance(1L,
+                        "1000000001", 100L));
+
+        // then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void useBalance_실패_계좌_소유주_다름() {
+        // given
+        Optional<AccountUser> userData = Optional.of(AccountUser.builder()
+                .id(12345L).build());
+
+        Optional<AccountUser> otherUser = Optional.of(AccountUser.builder()
+                .id(2222L).build());
+
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(userData);
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(Account.builder()
+                        .accountUser(otherUser.get())
+                        .accountStatus(AccountStatus.IN_USE)
+                        .balance(111L)
+                        .accountNumber("1110").build())
+                );
+
+        // when
+        AccountException exception = assertThrows(AccountException.class
+                , () -> transactionService.useBalance(1L,
+                        "1000000001", 100L));
+
+        // then
+        assertEquals(ErrorCode.USER_ACCOUNT_NOT_MATCH, exception.getErrorCode());
+    }
+
+    @Test
+    void useBalance_실패_계좌_해지상태() {
+        // given
+        Optional<AccountUser> userData = Optional.of(AccountUser.builder()
+                .id(12345L).build());
+
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(userData);
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(Account.builder()
+                        .accountUser(userData.get())
+                        .accountStatus(AccountStatus.UNREGISTERED)
+                        .balance(111L)
+                        .accountNumber("1110").build())
+                );
+
+        // when
+        AccountException exception = assertThrows(AccountException.class
+                , () -> transactionService.useBalance(1L,
+                        "1000000001", 100L));
+
+        // then
+        assertEquals(ErrorCode.ACCOUNT_ALREADY_UNREGISTERED, exception.getErrorCode());
+    }
+
+    @Test
+    void useBalance_실패_계좌잔액이_부족한_경우() {
+        // given
+        Optional<AccountUser> userData = Optional.of(AccountUser.builder()
+                .id(12345L).build());
+
+        given(accountUserRepository.findById(anyLong()))
+                .willReturn(userData);
+        given(accountRepository.findByAccountNumber(anyString()))
+                .willReturn(Optional.of(Account.builder()
+                        .accountUser(userData.get())
+                        .accountStatus(AccountStatus.IN_USE)
+                        .balance(99L)
+                        .accountNumber("1110").build())
+                );
+
+        // when
+        AccountException exception = assertThrows(AccountException.class
+                , () -> transactionService.useBalance(1L,
+                        "1000000001", 100L));
+
+        // then
+        assertEquals(ErrorCode.AMOUNT_EXCEED_BALANCE, exception.getErrorCode());
     }
 
 }
