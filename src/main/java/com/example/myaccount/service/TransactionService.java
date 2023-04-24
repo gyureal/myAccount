@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static com.example.myaccount.type.ErrorCode.*;
+import static com.example.myaccount.type.TransactionResultType.F;
 import static com.example.myaccount.type.TransactionResultType.S;
 import static com.example.myaccount.type.TransactionType.*;
 
@@ -52,16 +53,7 @@ public class TransactionService {
         account.useBalance(amount);
 
         Transaction transaction =
-                transactionRepository.save(Transaction.builder()
-                        .transactionType(USE)
-                        .transactionResultType(S)
-                        .account(account)
-                        .amount(amount)
-                        .balanceSnapShot(account.getBalance())
-                        .transactionId(UUID.randomUUID().toString()
-                                .replace("-", ""))    // 랜덤값
-                        .transactionAt(LocalDateTime.now())
-                        .build());
+                saveAndGetTransaction(S, account, amount);
 
         return TransactionDto.fromEntity(transaction);
     }
@@ -80,5 +72,26 @@ public class TransactionService {
         }
     }
 
+    @Transactional
+    public void saveFailedUseTransaction(String accountNumber, Long amount) {
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountException(ACCOUNT_NOT_FOUND));
 
+        saveAndGetTransaction(F, account, amount);
+    }
+
+    private Transaction saveAndGetTransaction(
+            TransactionResultType transactionResultType
+            , Account account, Long amount) {
+        return transactionRepository.save(Transaction.builder()
+                .transactionType(USE)
+                .transactionResultType(transactionResultType)
+                .account(account)
+                .amount(amount)
+                .balanceSnapShot(account.getBalance())
+                .transactionId(UUID.randomUUID().toString()
+                        .replace("-", ""))    // 랜덤값
+                .transactionAt(LocalDateTime.now())
+                .build());
+    }
 }
