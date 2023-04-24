@@ -36,6 +36,7 @@ public class UseBalance {
         private Long amount;
     }
 
+
     /**
      * {
      *    "accountNumber":"1234567890",
