@@ -124,4 +124,9 @@ public class TransactionService {
             throw new AccountException(TOO_OLD_ORDER_TO_CANCEL);
         }
     }
+
+    public TransactionDto queryTransaction(String transactionId) {
+        return TransactionDto.fromEntity(transactionRepository.findByTransactionId(transactionId)
+                .orElseThrow(() -> new AccountException(TRANSACTION_NOT_FOUND)));
+    }
 }
