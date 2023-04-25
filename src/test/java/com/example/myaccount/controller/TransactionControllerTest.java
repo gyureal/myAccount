@@ -96,4 +96,28 @@ class TransactionControllerTest {
 
     }
 
+    @Test
+    void successQueryTransaction() throws Exception {
+        given(transactionService.queryTransaction(any()))
+                .willReturn(TransactionDto.builder()
+                        .accountNumber("1000000001")
+                        .transactionType(TransactionType.USE)
+                        .transactionResultType(TransactionResultType.S)
+                        .amount(12345L)
+                        .balanceSnapShot(12345L)
+                        .transactionId("tid")
+                        .transactionAt(LocalDateTime.now())
+                        .build());
+
+        // when
+        // then
+        mockMvc.perform(get("/transaction/tId")
+                ).andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accountNumber").value("1000000001"))
+                .andExpect(jsonPath("$.transactionResultType").value("S"))
+                .andExpect(jsonPath("$.transactionId").value("tid"))
+                .andExpect(jsonPath("$.amount").value(12345L));
+    }
+
 }

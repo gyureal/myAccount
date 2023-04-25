@@ -356,5 +356,32 @@ class TransactionServiceTest {
         assertEquals(ErrorCode.TOO_OLD_ORDER_TO_CANCEL, exception.getErrorCode());
     }
 
+    @Test
+    public void queryTransaction_성공() {
+        // given
+        Account account = Account.builder()
+                .accountNumber("1110000000")
+                .accountUser(new AccountUser())
+                .accountStatus(AccountStatus.IN_USE)
+                .balance(1000L)
+                .build();
+        Transaction transaction = Transaction.builder()
+                .account(account)
+                .transactionType(TransactionType.CANCEL)
+                .transactionResultType(TransactionResultType.S)
+                .amount(100L)
+                .balanceSnapShot(900L)
+                .transactionAt(LocalDateTime.now().minusYears(1))
+                .build();
+        given(transactionRepository.findByTransactionId(any()))
+                .willReturn(Optional.of(transaction));
 
+        // when
+        TransactionDto transactionDto = transactionService.queryTransaction("tId");
+
+        // then
+        assertEquals(TransactionType.CANCEL, transactionDto.getTransactionType());
+        assertEquals(TransactionResultType.S, transactionDto.getTransactionResultType());
+        assertEquals(100L, transactionDto.getAmount());
+    }
 }
