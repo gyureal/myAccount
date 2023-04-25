@@ -1,10 +1,11 @@
 package com.example.myaccount.controller;
 
-import com.example.myaccount.domain.Transaction;
+import com.example.myaccount.dto.CancelBalance;
 import com.example.myaccount.dto.TransactionDto;
 import com.example.myaccount.dto.UseBalance;
 import com.example.myaccount.exception.AccountException;
 import com.example.myaccount.service.TransactionService;
+import com.example.myaccount.type.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,9 +39,31 @@ public class TransactionController {
         } catch (AccountException e) {
             log.error("Failed to use balance. ");
 
-            transactionService.saveFailedUseTransaction(
-                request.getAccountNumber(),
-                request.getAmount()
+            transactionService.saveFailedTransaction(
+                    TransactionType.USE,
+                    request.getAccountNumber(),
+                    request.getAmount()
+            );
+            throw e;
+        }
+    }
+
+    @PostMapping("/transaction/cancel")
+    public CancelBalance.Response cancelBalance(
+            @Valid @RequestBody CancelBalance.Request request) {
+
+        TransactionDto transactionDto;
+        try {
+            transactionDto = transactionService.cancelBalance(request.getTransactionId(),
+                    request.getAccountNumber(), request.getAmount());
+            return CancelBalance.Response.from(transactionDto);
+        } catch (AccountException e) {
+            log.error("Failed to use balance. ");
+
+            transactionService.saveFailedTransaction(
+                    TransactionType.CANCEL,
+                    request.getAccountNumber(),
+                    request.getAmount()
             );
             throw e;
         }

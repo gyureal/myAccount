@@ -46,4 +46,11 @@ public class Account {
         balance -= amount;
     }
 
+    public void cancelBalance(Long amount) {
+        if (amount < 0) {
+            throw new AccountException(ErrorCode.AMOUNT_EXCEED_BALANCE);
+        }
+        balance += amount;
+    }
+
 }
