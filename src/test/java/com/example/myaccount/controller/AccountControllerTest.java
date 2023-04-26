@@ -6,7 +6,6 @@ import com.example.myaccount.dto.AccountDto;
 import com.example.myaccount.dto.CreateAccount;
 import com.example.myaccount.dto.DeleteAccount;
 import com.example.myaccount.service.AccountService;
-import com.example.myaccount.service.RedisTestService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -35,9 +34,6 @@ class AccountControllerTest {
 
     @MockBean
     private AccountService accountService;
-
-    @MockBean
-    private RedisTestService redisTestService;
 
     @Autowired
     private MockMvc mockMvc;
