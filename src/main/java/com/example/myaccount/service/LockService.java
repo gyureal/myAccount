@@ -22,14 +22,16 @@ public class LockService {
 
         try {
             // 3초 동안 락을 건다.
-            boolean isLock = lock.tryLock(1, 5, TimeUnit.SECONDS); // 락 획득 시도
+            boolean isLock = lock.tryLock(1, 15, TimeUnit.SECONDS); // 락 획득 시도
 
             if (!isLock) {
                 log.error("=========Lock acquisition failed");
                 throw new AccountException(ErrorCode.ACCOUNT_TRANSACTION_LOCK);
             }
+        } catch (AccountException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Redis lock failed");
+            log.error("Redis lock failed", e);
         }
     }
 
